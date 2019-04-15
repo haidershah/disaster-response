@@ -37,7 +37,7 @@ models/train_classifier.py: includes a machine learning pipeline that:
 app/run.py: includes a Flask web app that runs the model on new messages and data visualization.
 
 - app
-| - template
+-- template
 | |- master.html  # main page of web app
 | |- go.html  # classification result page of web app
 |- run.py  # Flask file that runs app
