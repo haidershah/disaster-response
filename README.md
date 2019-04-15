@@ -1,5 +1,8 @@
 # Disaster Response Pipeline Project
 
+## Summary
+Classify disaster responses.
+
 ### Instructions:
 1. Run the following commands in the project's root directory to set up your database and model.
 
