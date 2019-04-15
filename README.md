@@ -18,12 +18,24 @@ The model classifies messages sent during natural disasters. During disasters it
 
 ### Files
 
-data/process_data.py: includes a data cleaning pipeline that:
+app/template/master.html - main page of web app
+
+app/template/go.html - classification result page of web app
+
+app/run.py - a Flask web app that runs the model on new messages and data visualization.
+
+data/disaster_categories.csv - data to process
+
+data/disaster_messages.csv - data to process
+
+data/process_data.py - a data cleaning pipeline that:
 
 - Loads the messages and categories datasets
 - Merges the two datasets
 - Cleans the data
 - Stores it in a SQLite database
+
+data/InsertDatabaseName.db - database to save clean data to
 
 models/train_classifier.py: includes a machine learning pipeline that:
 
@@ -34,20 +46,4 @@ models/train_classifier.py: includes a machine learning pipeline that:
 - Outputs results on the test set
 - Exports the final model as a pickle file
 
-app/run.py: includes a Flask web app that runs the model on new messages and data visualization.
-
-- app
--- template
-| |- master.html  # main page of web app
-| |- go.html  # classification result page of web app
-|- run.py  # Flask file that runs app
-
-- data
-|- disaster_categories.csv  # data to process 
-|- disaster_messages.csv  # data to process
-|- process_data.py
-|- InsertDatabaseName.db   # database to save clean data to
-
-- models
-|- train_classifier.py
-|- classifier.pkl  # saved model 
+models/classifier.pkl - saved model
