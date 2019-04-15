@@ -18,6 +18,18 @@ import sys
 import pickle
 
 def load_data(database_filepath):
+    """
+    Loads data from database.
+
+    Parameters:
+        database_filepath: Filepath of database to load.
+
+    Returns:
+        X: Features
+        Y: Labels
+        category_names: Names of categories.
+    """
+
     # load data from database
     engine = create_engine('sqlite:///' + database_filepath)
     df = pd.read_sql_table(table_name='InsertTableName', con=engine)
@@ -32,17 +44,26 @@ def load_data(database_filepath):
     category_names = list(Y_df.columns)
 
     return X, Y, category_names
-    
+
 def tokenize(text):
+    """
+    Tokenizes raw text data.
+
+    Parameters:
+        text: Raw text to tokenize.
+
+    Returns:
+        Tokens
+    """
     tokens = word_tokenize(text)
-    
+
     # initiate lemmatizer
     lemmatizer = WordNetLemmatizer()
-    
+
     # iterate through each token
     clean_tokens = []
     for token in tokens:
-        
+
         # lemmatize, normalize case, and remove leading/trailing white space
         clean_token = lemmatizer.lemmatize(token).lower().strip()
         clean_tokens.append(clean_token)
@@ -50,12 +71,20 @@ def tokenize(text):
     return clean_tokens
 
 def build_model():
+    """
+    Builds a machine learning pipeline. Uses grid search to find better
+    parameters.
+
+    Returns:
+        Model
+    """
+
     pipeline = Pipeline([
         ('vect', CountVectorizer(tokenizer=tokenize)),
         ('tfidf', TfidfTransformer()),
         ('clf', MultiOutputClassifier(RandomForestClassifier()))
     ])
-    
+
     parameters = {'clf__estimator__n_estimators': [50, 100],
                   'clf__estimator__max_depth': [20, 40]
     }
@@ -64,12 +93,29 @@ def build_model():
     return cv
 
 def evaluate_model(model, X_test, Y_test, category_names):
+    """
+    Reports the f1 score, precision and recall for each output category
+    of the dataset.
+
+    Parameters:
+        model: Model to evaluate.
+        X_test: Feature testing set.
+        Y_test: Label testing set.
+        category_names: Category names to evaluate.
+    """
     y_pred = model.predict(X_test)
 
     for column in range(len(category_names)):
         print(classification_report(Y_test[:, column], y_pred[:, column]))
 
 def save_model(model, model_filepath):
+    """
+    Stores model in a SQLite database.
+
+    Parameters:
+        model: Model to save.
+        model_filepath: Filepath where model should be saved.
+    """
     outfile = open(model_filepath,'wb')
     pickle.dump(model, outfile)
     outfile.close()
@@ -80,13 +126,13 @@ def main():
         print('Loading data...\n    DATABASE: {}'.format(database_filepath))
         X, Y, category_names = load_data(database_filepath)
         X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.2)
-        
+
         print('Building model...')
         model = build_model()
-        
+
         print('Training model...')
         model.fit(X_train, Y_train)
-        
+
         print('Evaluating model...')
         evaluate_model(model, X_test, Y_test, category_names)
 
