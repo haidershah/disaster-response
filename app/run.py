@@ -32,6 +32,63 @@ df = pd.read_sql_table('InsertTableName', engine)
 # load model
 model = joblib.load("../models/classifier.pkl")
 
+def get_dist_message_genres_graph():
+    genre_counts = df.groupby('genre').count()['message']
+    genre_names = list(genre_counts.index)
+    return {
+                'data': [
+                    Bar(
+                        x=genre_names,
+                        y=genre_counts
+                    )
+                ],
+
+                'layout': {
+                    'title': 'Distribution of Message Genres',
+                    'yaxis': {
+                        'title': "Count"
+                    },
+                    'xaxis': {
+                        'title': "Genre"
+                    }
+                }
+            }
+
+def get_top_five_graph():
+    categories_df = df.drop(columns=['id', 'message', 'original', 'genre'])
+    category_names = list(categories_df.columns)
+    category_name_counts = []
+    for count, column in enumerate(categories_df):
+        category_name_counts.append((category_names[count], df[column].sum()))
+
+    category_name_counts.sort(key=lambda tup: tup[1], reverse=True)
+    category_name_counts = category_name_counts[:5] # keep only top 5
+    
+    category_names = []
+    category_counts = []
+    
+    for category in category_name_counts:
+        category_names.append(category[0])
+        category_counts.append(category[1])
+        
+    return {
+                'data': [
+                    Bar(
+                        x=category_names,
+                        y=category_counts
+                    )
+                ],
+
+                'layout': {
+                    'title': 'Top 5 Message Categories',
+                    'yaxis': {
+                        'title': "Count"
+                    },
+                    'xaxis': {
+                        'title': "Category"
+                    }
+                }
+            }
 
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
@@ -40,31 +97,10 @@ def index():
     
     # extract data needed for visuals
     # TODO: Below is an example - modify to extract data for your own visuals
-    genre_counts = df.groupby('genre').count()['message']
-    genre_names = list(genre_counts.index)
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
-    graphs = [
-        {
-            'data': [
-                Bar(
-                    x=genre_names,
-                    y=genre_counts
-                )
-            ],
-
-            'layout': {
-                'title': 'Distribution of Message Genres',
-                'yaxis': {
-                    'title': "Count"
-                },
-                'xaxis': {
-                    'title': "Genre"
-                }
-            }
-        }
-    ]
+    graphs = [get_dist_message_genres_graph(), get_top_five_graph()]
     
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
