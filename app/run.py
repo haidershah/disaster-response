@@ -7,7 +7,7 @@ from nltk.tokenize import word_tokenize
 
 from flask import Flask
 from flask import render_template, request, jsonify
-from plotly.graph_objs import Bar
+from plotly.graph_objs import Bar, Pie
 from sklearn.externals import joblib
 from sqlalchemy import create_engine
 
@@ -90,6 +90,22 @@ def get_top_five_graph():
                 }
             }
 
+def get_dist_missing_people_graph():
+    genre_counts = df[df['missing_people'] == 1].groupby('genre').count()['message']
+    genre_names = list(genre_counts.index)
+    return {
+                'data': [
+                    Pie(
+                        labels=genre_names,
+                        values=genre_counts
+                    )
+                ],
+
+                'layout': {
+                    'title': 'Distribution of Missing People Messages by Genres',
+                }
+            }
+
 # index webpage displays cool visuals and receives user input text for model
 @app.route('/')
 @app.route('/index')
@@ -100,7 +116,7 @@ def index():
     
     # create visuals
     # TODO: Below is an example - modify to create your own visuals
-    graphs = [get_dist_message_genres_graph(), get_top_five_graph()]
+    graphs = [get_dist_message_genres_graph(), get_top_five_graph(), get_dist_missing_people_graph()]
     
     # encode plotly graphs in JSON
     ids = ["graph-{}".format(i) for i, _ in enumerate(graphs)]
